@@ -1,0 +1,337 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.3.255.40792",
+      "templateHash": "9329840606322196791"
+    }
+  },
+  "parameters": {
+    "rgMgmtName": {
+      "type": "string",
+      "defaultValue": "rg-mgmt"
+    },
+    "rgWlName": {
+      "type": "string",
+      "defaultValue": "rg-wl"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "westus2"
+    },
+    "vnetName": {
+      "type": "string",
+      "defaultValue": "citrix-workloads-vnet"
+    },
+    "vnetPrexix": {
+      "type": "array",
+      "defaultValue": [
+        "10.0.0.0/16"
+      ]
+    },
+    "subnet01Name": {
+      "type": "string",
+      "defaultValue": "untrusted"
+    },
+    "subnet02Name": {
+      "type": "string",
+      "defaultValue": "trusted"
+    },
+    "subnet03Name": {
+      "type": "string",
+      "defaultValue": "mgmt"
+    },
+    "subnet04Name": {
+      "type": "string",
+      "defaultValue": "vdi"
+    },
+    "subnet01Prefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24"
+    },
+    "subnet02Prefix": {
+      "type": "string",
+      "defaultValue": "10.0.1.0/24"
+    },
+    "subnet03Prefix": {
+      "type": "string",
+      "defaultValue": "10.0.2.0/24"
+    },
+    "subnet04Prefix": {
+      "type": "string",
+      "defaultValue": "10.0.3.0/23"
+    }
+  },
+  "functions": [],
+  "variables": {
+    "subnets": [
+      {
+        "name": "[parameters('subnet01Name')]",
+        "properties": {
+          "addressPrefix": "[parameters('subnet01Prefix')]"
+        }
+      },
+      {
+        "name": "[parameters('subnet02Name')]",
+        "properties": {
+          "addressPrefix": "[parameters('subnet02Prefix')]"
+        }
+      },
+      {
+        "name": "[parameters('subnet03Name')]",
+        "properties": {
+          "addressPrefix": "[parameters('subnet03Prefix')]"
+        }
+      },
+      {
+        "name": "[parameters('subnet04Name')]",
+        "properties": {
+          "addressPrefix": "[parameters('subnet04Prefix')]"
+        }
+      }
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "rgMgmt",
+      "subscriptionId": "[subscription().subscriptionId]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "rgLocation": {
+            "value": "[parameters('location')]"
+          },
+          "rgName": {
+            "value": "[parameters('rgMgmtName')]"
+          },
+          "rgTags": {
+            "value": {}
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.3.255.40792",
+              "templateHash": "17525877105071672977"
+            }
+          },
+          "parameters": {
+            "rgName": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource Group Name"
+              }
+            },
+            "rgLocation": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource Group Location"
+              }
+            },
+            "rgTags": {
+              "type": "object",
+              "metadata": {
+                "description": "Resource Group Tags"
+              }
+            }
+          },
+          "functions": [],
+          "variables": {
+            "tags": "[if(not(empty(parameters('rgTags'))), parameters('rgTags'), createObject())]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/resourceGroups",
+              "apiVersion": "2020-10-01",
+              "name": "[parameters('rgName')]",
+              "location": "[parameters('rgLocation')]",
+              "tags": "[variables('tags')]"
+            }
+          ],
+          "outputs": {
+            "rgDetails": {
+              "type": "object",
+              "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('rgName')), '2020-10-01', 'full')]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "rgWlName",
+      "subscriptionId": "[subscription().subscriptionId]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "rgLocation": {
+            "value": "[parameters('location')]"
+          },
+          "rgName": {
+            "value": "[parameters('rgWlName')]"
+          },
+          "rgTags": {
+            "value": {}
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.3.255.40792",
+              "templateHash": "17525877105071672977"
+            }
+          },
+          "parameters": {
+            "rgName": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource Group Name"
+              }
+            },
+            "rgLocation": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource Group Location"
+              }
+            },
+            "rgTags": {
+              "type": "object",
+              "metadata": {
+                "description": "Resource Group Tags"
+              }
+            }
+          },
+          "functions": [],
+          "variables": {
+            "tags": "[if(not(empty(parameters('rgTags'))), parameters('rgTags'), createObject())]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Resources/resourceGroups",
+              "apiVersion": "2020-10-01",
+              "name": "[parameters('rgName')]",
+              "location": "[parameters('rgLocation')]",
+              "tags": "[variables('tags')]"
+            }
+          ],
+          "outputs": {
+            "rgDetails": {
+              "type": "object",
+              "value": "[reference(subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('rgName')), '2020-10-01', 'full')]"
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-10-01",
+      "name": "[parameters('vnetName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "vnetAddressPrefix": {
+            "value": "[parameters('vnetPrexix')]"
+          },
+          "vnetName": {
+            "value": "[parameters('vnetName')]"
+          },
+          "vnetRG": {
+            "value": "[reference(subscriptionResourceId('Microsoft.Resources/deployments', 'rgMgmt'), '2019-10-01').outputs.rgDetails.value]"
+          },
+          "vnetSubnets": {
+            "value": "[variables('subnets')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.3.255.40792",
+              "templateHash": "15962917034454340578"
+            }
+          },
+          "parameters": {
+            "vnetName": {
+              "type": "string",
+              "metadata": {
+                "description": "Virtual Network Name"
+              }
+            },
+            "vnetRG": {
+              "type": "object",
+              "metadata": {
+                "description": "Virtual Network Resource Group Name"
+              }
+            },
+            "vnetAddressPrefix": {
+              "type": "array",
+              "metadata": {
+                "description": "Vnet Address Prefix"
+              }
+            },
+            "vnetSubnets": {
+              "type": "array",
+              "defaultValue": [],
+              "metadata": {
+                "description": "Virtual Network Subnets"
+              }
+            }
+          },
+          "functions": [],
+          "resources": [
+            {
+              "type": "Microsoft.Network/virtualNetworks",
+              "apiVersion": "2020-11-01",
+              "name": "[parameters('vnetName')]",
+              "location": "[parameters('vnetRG').location]",
+              "properties": {
+                "addressSpace": {
+                  "addressPrefixes": "[parameters('vnetAddressPrefix')]"
+                },
+                "subnets": "[parameters('vnetSubnets')]"
+              }
+            }
+          ],
+          "outputs": {
+            "vnetName": {
+              "type": "string",
+              "value": "[parameters('vnetName')]"
+            },
+            "vnetId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/deployments', 'rgMgmt')]"
+      ]
+    }
+  ]
+}
