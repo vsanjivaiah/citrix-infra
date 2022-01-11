@@ -1,5 +1,13 @@
 targetScope = 'subscription'
 
+param nsNames array = [
+  'ns001'
+  'ns002'
+]
+param cloudconnectornames array = [
+  'cc001'
+  'ns002'
+]
 param rgMgmtName string = 'rg-mgmt'
 param rgWlName string = 'rg-wl'
 param location string = 'westus2'
@@ -139,6 +147,7 @@ module adc 'modules/netscaler/ns.bicep' = {
     nsVmSize: nsVmSize
     nsVmSku: nsVmSku    
     ADCVersion: ADCVersion
+    nsNames: nsNames
   }
 }
 
@@ -154,6 +163,7 @@ module cloudconnector 'modules/cloudconnectors/cc.bicep' = {
     cloudConnectorSKU: ''
     cloudConnectorVersion: ''
     cloudConnectorVMSize: ''
+    cloudconnectornames: cloudconnectornames
   }
 }
 
