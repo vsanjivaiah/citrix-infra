@@ -1,10 +1,11 @@
-param elbName string
-param elbLocation string
 param vnetRGName string
 param vnetName string
 param snetName01 string
 param snetName11 string
 param snetName12 string
+param nshNSMgmtName string = 'nsg-ns-mgmt01'
+param nshNSUntrustedName string = 'nsg-ns-untrusted01'
+param nshNSTrustedName string = 'nsg-ns-trusted01'
 
 param nsAdminUserName string = 'nsadministrator'
 @secure()
@@ -92,8 +93,8 @@ resource nsalbpip 'Microsoft.Network/publicIPAddresses@2020-11-01' = [for i in r
 }]
 
 //nsg rules
-resource nsgint01 'Microsoft.Network/networkSecurityGroups@2020-08-01' = [for i in range(0,2) : {
-  name: '${nsgNS}${i}-01'
+resource nsgint01 'Microsoft.Network/networkSecurityGroups@2020-08-01' = {
+  name: nshNSMgmtName
   location: resourceGroup().location
   properties: {
     securityRules: [
@@ -125,11 +126,11 @@ resource nsgint01 'Microsoft.Network/networkSecurityGroups@2020-08-01' = [for i 
       }
     ]
   }
-}]
+}
 
 //nsg rules for nic 11
-resource nsgint11 'Microsoft.Network/networkSecurityGroups@2020-08-01' = [for i in range(0,2) : {
-  name: '${nsgNS}${i}-11'
+resource nsgint11 'Microsoft.Network/networkSecurityGroups@2020-08-01' = {
+  name: nshNSUntrustedName
   location: resourceGroup().location
   properties: {
     securityRules: [
@@ -148,11 +149,11 @@ resource nsgint11 'Microsoft.Network/networkSecurityGroups@2020-08-01' = [for i 
       }
     ]
   }
-}]
+}
 
 //nsg rules for nic 12
-resource nsgint12 'Microsoft.Network/networkSecurityGroups@2020-08-01' = [for i in range(0,2) : {
-  name: '${nsgNS}${i}-12'
+resource nsgint12 'Microsoft.Network/networkSecurityGroups@2020-08-01' =  {
+  name: nshNSTrustedName
   location: resourceGroup().location
   properties: {
     securityRules: [
@@ -171,7 +172,7 @@ resource nsgint12 'Microsoft.Network/networkSecurityGroups@2020-08-01' = [for i 
       }
     ]
   }
-}]
+}
 
 resource nsavalset 'Microsoft.Compute/availabilitySets@2020-12-01' = {
   name: avsN
@@ -243,7 +244,7 @@ resource lb 'Microsoft.Network/loadBalancers@2020-11-01' = {
 }
 
 resource nsnic01 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in range(0,2) : {
-  name: '${nsgNS}${i}-nic-01'
+  name: '${nicNS}${i}-nic-01'
   location: resourceGroup().location
   properties: {
     enableAcceleratedNetworking: true
@@ -262,11 +263,14 @@ resource nsnic01 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in ra
         }
       }
     ]
+    networkSecurityGroup: {
+      id: nsgint01.id
+    }
   }
 }]
 
 resource nsnic011 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in range(0,2) : {
-  name: '${nsgNS}${i}-nic-11'
+  name: '${nicNS}${i}-nic-11'
   location: resourceGroup().location
   properties: {
     enableAcceleratedNetworking: true
@@ -284,14 +288,18 @@ resource nsnic011 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in r
               id: bePoolId
             }
           ]
+          
         }
       }
     ]
+    networkSecurityGroup: {
+      id: nsgint11.id
+    }
   }
 }]
 
 resource nsnic012 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in range(0,2) : {
-  name: '${nsgNS}${i}-nic-12'
+  name: '${nicNS}${i}-nic-12'
   location: resourceGroup().location
   properties: {
     enableAcceleratedNetworking: true
@@ -312,5 +320,8 @@ resource nsnic012 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in r
         }
       }
     ]
+    networkSecurityGroup: {
+      id: nsgint12.id
+    }
   }
 }]
