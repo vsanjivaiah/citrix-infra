@@ -1,5 +1,8 @@
 targetScope = 'subscription'
 
+param windowsLocalAdminUserName string
+param windowsLocalAdminPassword string
+param cloudConnectorVMSize string
 param nsNames array = [
   'ns001'
   'ns002'
@@ -156,13 +159,13 @@ module cloudconnector 'modules/cloudconnectors/cc.bicep' = {
   name: 'cc'
   params: {
     ccSnet: vnet.outputs.vnetSubnets[2].name
-    cloudConnectorAdminPassword: ''
-    cloudConnectorAdminUserName: ''
+    cloudConnectorAdminPassword: windowsLocalAdminPassword
+    cloudConnectorAdminUserName: windowsLocalAdminUserName
     cloudConnectorOffer: ''
     cloudConnectorPublisher: ''
     cloudConnectorSKU: ''
     cloudConnectorVersion: ''
-    cloudConnectorVMSize: ''
+    cloudConnectorVMSize: cloudConnectorVMSize
     cloudconnectornames: cloudconnectornames
   }
 }
