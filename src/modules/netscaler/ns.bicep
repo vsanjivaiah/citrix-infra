@@ -68,8 +68,8 @@ var snetRef11 = '${vnetId}/subnets/${snetName11}'
 var snetRef12 =  '${vnetId}/subnets/${snetName12}'
 var lbId = resourceId('Microsoft.Network/loadBalancers', lbN)
 var bePoolId = '${lbId}/backendAddressPools/${bePoolN}'
-var probeId = '${lbId}/probes/${probeN}'
-var ipConfId = '${lbId}/frontendIpConfigurations/${ipConfN}'
+// var probeId = '${lbId}/probes/${probeN}'
+// var ipConfId = '${lbId}/frontendIpConfigurations/${ipConfN}'
 var nsCount = length(nsNames)
 
 // resource elb 'Microsoft.Network/loadBalancers@2021-03-01' = {
