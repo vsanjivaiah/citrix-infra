@@ -149,7 +149,6 @@ module cloudconnector 'modules/cloudconnectors/cc.bicep' = {
     ccSnet: vnet.outputs.vnetSubnets[2].name
     cloudConnectorAdminPassword: ''
     cloudConnectorAdminUserName: ''
-    cloudconnectornameprefix: ''
     cloudConnectorOffer: ''
     cloudConnectorPublisher: ''
     cloudConnectorSKU: ''

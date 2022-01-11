@@ -1,4 +1,8 @@
 param vnetRGName string
+param nsNames array = [
+  'ns001'
+  'ns002'
+]
 param vnetName string
 param snetName01 string
 param snetName11 string
@@ -6,7 +10,9 @@ param snetName12 string
 param nshNSMgmtName string = 'nsg-ns-mgmt01'
 param nshNSUntrustedName string = 'nsg-ns-untrusted01'
 param nshNSTrustedName string = 'nsg-ns-trusted01'
-
+param planPublisher string = 'citrix'
+param planProduct string = 'citrix'
+param planName string = 'citrix'
 param nsAdminUserName string = 'nsadministrator'
 @secure()
 param nsAdminPassword string 
@@ -48,8 +54,6 @@ param ADCVersion string = 'netscalervpx-131'
 param nsVmSku string = 'netscalerbyol'
 
 var vmNS = 'ns-vpx'
-var nicNS = 'ns-vpx-nic'
-var nsgNS = 'ns-vpx-nic-nsg'
 var lbN = 'alb'
 var bePoolN = 'bepool-11'
 var probeN = 'probe-11'
@@ -66,7 +70,7 @@ var lbId = resourceId('Microsoft.Network/loadBalancers', lbN)
 var bePoolId = '${lbId}/backendAddressPools/${bePoolN}'
 var probeId = '${lbId}/probes/${probeN}'
 var ipConfId = '${lbId}/frontendIpConfigurations/${ipConfN}'
-
+var nsCount = length(nsNames)
 
 // resource elb 'Microsoft.Network/loadBalancers@2021-03-01' = {
 //   name: elbName
@@ -76,7 +80,7 @@ var ipConfId = '${lbId}/frontendIpConfigurations/${ipConfN}'
 //   }
 // }
 
-resource nsmgmtpip 'Microsoft.Network/publicIPAddresses@2020-11-01' = [for i in range(0,2): {
+resource nsmgmtpip 'Microsoft.Network/publicIPAddresses@2020-11-01' = [for i in range(0,nsCount): {
   name: '${vmNS}${i}${mgmtpipNsuffix}'
   location: resourceGroup().location
   properties: {
@@ -84,7 +88,7 @@ resource nsmgmtpip 'Microsoft.Network/publicIPAddresses@2020-11-01' = [for i in 
   }
 }]
 
-resource nsalbpip 'Microsoft.Network/publicIPAddresses@2020-11-01' = [for i in range(0,2): {
+resource nsalbpip 'Microsoft.Network/publicIPAddresses@2020-11-01' = [for i in range(0,nsCount): {
   name: '${vmNS}${i}${albpipN}'
   location: resourceGroup().location
   properties: {
@@ -223,8 +227,8 @@ resource lb 'Microsoft.Network/loadBalancers@2020-11-01' = {
   ]
 }
 
-resource nsnic01 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in range(0,2) : {
-  name: '${nicNS}${i}-nic-01'
+resource nsnic01 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in range(0,nsCount) : {
+  name: '${nsNames[i]}-nic-01'
   location: resourceGroup().location
   properties: {
     enableAcceleratedNetworking: true
@@ -249,8 +253,8 @@ resource nsnic01 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in ra
   }
 }]
 
-resource nsnic011 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in range(0,2) : {
-  name: '${nicNS}${i}-nic-11'
+resource nsnic011 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in range(0,nsCount) : {
+  name: '${nsNames[i]}-nic-11'
   location: resourceGroup().location
   properties: {
     enableAcceleratedNetworking: true
@@ -278,8 +282,8 @@ resource nsnic011 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in r
   }
 }]
 
-resource nsnic012 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in range(0,2) : {
-  name: '${nicNS}${i}-nic-12'
+resource nsnic012 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in range(0,nsCount) : {
+  name: '${nsNames[i]}-nic-12'
   location: resourceGroup().location
   properties: {
     enableAcceleratedNetworking: true
@@ -306,8 +310,8 @@ resource nsnic012 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in r
   }
 }]
 
-resource ns 'Microsoft.Compute/virtualMachines@2020-12-01' = [for i in range(0,2) : {
-  name: '${vmNS}-${i}'
+resource ns 'Microsoft.Compute/virtualMachines@2020-12-01' = [for i in range(0,nsCount) : {
+  name: '${nsNames[i]}'
   location: resourceGroup().location
   properties: {
     availabilitySet: {
@@ -334,7 +338,7 @@ resource ns 'Microsoft.Compute/virtualMachines@2020-12-01' = [for i in range(0,2
         createOption: 'FromImage'
         osType: 'Linux'
         caching: 'ReadWrite'
-        name: '${vmNS}-${i}-osdisk'
+        name: '${nsNames[i]}-osdisk'
       }
       imageReference: {
         offer: 'Citrix' //to be reviewed
@@ -352,5 +356,10 @@ resource ns 'Microsoft.Compute/virtualMachines@2020-12-01' = [for i in range(0,2
       vmSize: nsVmSize
     }
     
+  }
+  plan: {
+    name: planName
+    product: planProduct
+    publisher: planPublisher
   }
 }]

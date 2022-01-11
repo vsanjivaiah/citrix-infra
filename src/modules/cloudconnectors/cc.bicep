@@ -1,4 +1,7 @@
-param cloudconnectornameprefix string
+param cloudconnectornames array = [
+  'cc001'
+  'ns002'
+]
 param cloudConnectorVMSize string
 param cloudConnectorOffer string 
 param cloudConnectorPublisher string
@@ -11,6 +14,7 @@ param cloudConnectorAdminPassword string
 param ccSnet string
 
 var avalsetname  = 'aval-ctx-cloudconnector'
+var ccVMCount = length(cloudconnectornames)
 
 resource ccavalset 'Microsoft.Compute/availabilitySets@2020-12-01' = {
   name: avalsetname
@@ -21,8 +25,8 @@ resource ccavalset 'Microsoft.Compute/availabilitySets@2020-12-01' = {
   }
 }
 
-resource ccnic01 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in range(0,2) : {
-  name: '${cloudconnectornameprefix}${i}-nic-01'
+resource ccnic01 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in range(0,ccVMCount) : {
+  name: '${cloudconnectornames[i]}-nic-01'
   location: resourceGroup().location
   properties: {
     enableAcceleratedNetworking: true
@@ -41,8 +45,8 @@ resource ccnic01 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in ra
   }
 }]
 
-resource cloudConnectors 'Microsoft.Compute/virtualMachines@2020-12-01' = [for i in range(0,2) :{
-  name: '${cloudconnectornameprefix}-${i}'
+resource cloudConnectors 'Microsoft.Compute/virtualMachines@2020-12-01' = [for i in range(0,ccVMCount) :{
+  name: '${cloudconnectornames[i]}'
   location: resourceGroup().location
   properties: {
     hardwareProfile: {
@@ -68,14 +72,14 @@ resource cloudConnectors 'Microsoft.Compute/virtualMachines@2020-12-01' = [for i
       osDisk: {
         createOption: 'FromImage'
         caching: 'ReadWrite'
-        name: '${cloudconnectornameprefix}-${i}-osdisk'
+        name: '${cloudconnectornames[i]}-osdisk'
         osType: 'Windows'
       }
     }
     osProfile: {
       adminUsername: cloudConnectorAdminUserName
       adminPassword: cloudConnectorAdminPassword
-      computerName: '${cloudconnectornameprefix}-${i}'
+      computerName: '${cloudconnectornames[i]}'
 
     }
     
