@@ -215,27 +215,7 @@ resource lb 'Microsoft.Network/loadBalancers@2020-11-01' = {
         }
       }
     ]
-    loadBalancingRules: [
-      {
-        name: 'lbRule1'
-        properties: {
-          protocol: 'Tcp'
-          frontendPort: 80
-          frontendIPConfiguration: {
-            id: ipConfId
-          }
-          enableFloatingIP: true
-          idleTimeoutInMinutes: 4
-          loadDistribution: 'Default'
-          backendAddressPool: {
-            id: bePoolId
-          }
-          probe: {
-            id: probeId
-          }
-        }
-      }
-    ]
+    // TODO Find and implement NAT inbound rules from @Troy
   }
   dependsOn: [
     nsalbpip
@@ -280,7 +260,7 @@ resource nsnic011 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in r
         name: 'ipconfig01'
         properties: {
           subnet: {
-            id: snetRef01
+            id: snetRef11
           }
           privateIPAllocationMethod: 'Dynamic'
           loadBalancerBackendAddressPools: [
@@ -309,19 +289,68 @@ resource nsnic012 'Microsoft.Network/networkInterfaces@2020-08-01' = [for i in r
         name: 'ipconfig01'
         properties: {
           subnet: {
-            id: snetRef01
+            id: snetRef12
           }
           privateIPAllocationMethod: 'Dynamic'
-          loadBalancerBackendAddressPools: [
-            {
-              id: bePoolId
-            }
-          ]
+          // loadBalancerBackendAddressPools: [
+          //   {
+          //     id: bePoolId
+          //   }
+          // ]
         }
       }
     ]
     networkSecurityGroup: {
       id: nsgint12.id
     }
+  }
+}]
+
+resource ns 'Microsoft.Compute/virtualMachines@2020-12-01' = [for i in range(0,2) : {
+  name: '${vmNS}-${i}'
+  location: resourceGroup().location
+  properties: {
+    availabilitySet: {
+      id: nsavalset.id
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: nsnic01[i].id
+          properties:{
+            primary: true
+          }
+        }
+        {
+          id: nsnic011[i].id
+        }
+        {
+          id: nsnic012[i].id
+        }
+      ]
+    }
+    storageProfile: {
+      osDisk: {
+        createOption: 'FromImage'
+        osType: 'Linux'
+        caching: 'ReadWrite'
+        name: '${vmNS}-${i}-osdisk'
+      }
+      imageReference: {
+        offer: 'Citrix' //to be reviewed
+        publisher: 'citrix' //to be reviewed
+        sku: nsVmSku
+        version: ADCVersion
+      }
+    }
+    osProfile: {
+      adminUsername: nsAdminUserName
+      adminPassword: nsAdminPassword
+      computerName: '${vmNS}-${i}'
+    }
+    hardwareProfile: {
+      vmSize: nsVmSize
+    }
+    
   }
 }]

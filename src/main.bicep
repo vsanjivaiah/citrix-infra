@@ -1,4 +1,4 @@
-// targetScope = 'subscription'
+targetScope = 'subscription'
 
 param rgMgmtName string = 'rg-mgmt'
 param rgWlName string = 'rg-wl'
@@ -17,12 +17,11 @@ param vnetPrexix array = [
 param subnet01Name string = 'untrusted'
 param subnet02Name string = 'trusted'
 param subnet03Name string =  'mgmt'
-param subnet04Name string = 'vdi'
 
 param subnet01Prefix string = '10.0.0.0/24'
 param subnet02Prefix string = '10.0.1.0/24'
 param subnet03Prefix string = '10.0.2.0/24'
-param subnet04Prefix string = '10.0.3.0/23'
+
 
 param nsAdminUserName string = 'nsadministrator'
 @secure()
@@ -85,20 +84,14 @@ var subnets = [
       addressPrefix: subnet03Prefix
     }
   }
-  {
-    name: subnet04Name
-    properties: {
-      addressPrefix: subnet04Prefix
-    }
-  }
 ]
 
 
 
-var vnetId = {
-  new: resourceId('Microsoft.Network/virtualNetworks',vnetName)
-  existing: resourceId(rgWlName,'Microsoft.Network/virtualNetworks',vnetName)
-}
+// var vnetId = {
+//   new: resourceId('Microsoft.Network/virtualNetworks',vnetName)
+//   existing: resourceId(rgMgmtName,'Microsoft.Network/virtualNetworks',vnetName)
+// }
 module rgMgmt 'modules/resourcegroups/rg.bicep' = {
   scope: subscription()
   name: rgMgmtName
@@ -132,7 +125,38 @@ module vnet 'modules/virtualnetwork/vnet.bicep' = if(virtualNetworkNewOrExisting
   }
 }
 
+module adc 'modules/netscaler/ns.bicep' = {
+  name: 'adc'
+  scope: resourceGroup(rgMgmt.name) 
+  params: {
+    snetName01: vnet.outputs.vnetSubnets[0].name
+    snetName12: vnet.outputs.vnetSubnets[2].name
+    vnetRGName: rgMgmt.name
+    snetName11: vnet.outputs.vnetSubnets[1].name
+    nsAdminPassword: nsAdminPassword
+    vnetName: vnet.name
+    nsAdminUserName: nsAdminUserName
+    nsVmSize: nsVmSize
+    nsVmSku: nsVmSku    
+    ADCVersion: ADCVersion
+  }
+}
 
+module cloudconnector 'modules/cloudconnectors/cc.bicep' = {
+  scope: resourceGroup(rgwl.name)
+  name: 'cc'
+  params: {
+    ccSnet: vnet.outputs.vnetSubnets[2].name
+    cloudConnectorAdminPassword: ''
+    cloudConnectorAdminUserName: ''
+    cloudconnectornameprefix: ''
+    cloudConnectorOffer: ''
+    cloudConnectorPublisher: ''
+    cloudConnectorSKU: ''
+    cloudConnectorVersion: ''
+    cloudConnectorVMSize: ''
+  }
+}
 
 
 
